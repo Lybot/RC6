@@ -1,0 +1,11 @@
+C:\Users\pashk\Documents\GitHub\RC6\RC6\RC6\bin\Debug\netcoreapp2.1\RC6.deps.json
+C:\Users\pashk\Documents\GitHub\RC6\RC6\RC6\bin\Debug\netcoreapp2.1\RC6.runtimeconfig.json
+C:\Users\pashk\Documents\GitHub\RC6\RC6\RC6\bin\Debug\netcoreapp2.1\RC6.runtimeconfig.dev.json
+C:\Users\pashk\Documents\GitHub\RC6\RC6\RC6\bin\Debug\netcoreapp2.1\RC6.dll
+C:\Users\pashk\Documents\GitHub\RC6\RC6\RC6\bin\Debug\netcoreapp2.1\RC6.pdb
+C:\Users\pashk\Documents\GitHub\RC6\RC6\RC6\obj\Debug\netcoreapp2.1\RC6.csprojAssemblyReference.cache
+C:\Users\pashk\Documents\GitHub\RC6\RC6\RC6\obj\Debug\netcoreapp2.1\RC6.csproj.CoreCompileInputs.cache
+C:\Users\pashk\Documents\GitHub\RC6\RC6\RC6\obj\Debug\netcoreapp2.1\RC6.AssemblyInfoInputs.cache
+C:\Users\pashk\Documents\GitHub\RC6\RC6\RC6\obj\Debug\netcoreapp2.1\RC6.AssemblyInfo.cs
+C:\Users\pashk\Documents\GitHub\RC6\RC6\RC6\obj\Debug\netcoreapp2.1\RC6.dll
+C:\Users\pashk\Documents\GitHub\RC6\RC6\RC6\obj\Debug\netcoreapp2.1\RC6.pdb
