@@ -5,4 +5,8 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Include="C:\Users\pashk\Desktop\Program.cs" Link="Program.cs" />
+  </ItemGroup>
+
 </Project>
