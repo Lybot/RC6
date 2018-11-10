@@ -357,7 +357,7 @@ namespace RC6 // W=32  R= 20 B = 128,192,256
             Console.WriteLine(Encoding.UTF8.GetString(cipherText));
             try
             {
-                plaintText2=DecodeRc6(cipherText);
+                plaintText2=DecodeRc6Test(cipherText);
             }
             catch (Exception e)
             {
