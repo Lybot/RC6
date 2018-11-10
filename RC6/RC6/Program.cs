@@ -30,14 +30,17 @@ namespace RC6 // W=32  R= 20 B = 128,192,256
             count = count >> (W - nLgw);
             return count;
         }
-        private static void GenerateKey(int Long)
+        private static void GenerateKey(int Long, byte[] keyCheck)
         {
-            AesCryptoServiceProvider aesCrypto = new AesCryptoServiceProvider // ключи самому генерировать не очень
+            if (keyCheck == null)
             {
-                KeySize = Long
-            };
-            aesCrypto.GenerateKey();
-            MainKey = aesCrypto.Key;         
+                AesCryptoServiceProvider aesCrypto = new AesCryptoServiceProvider // ключи самому генерировать не очень
+                {
+                    KeySize = Long
+                };
+                aesCrypto.GenerateKey();
+                MainKey = aesCrypto.Key;
+            }
             int c=0;
             int i,j;
             switch (Long)
@@ -115,7 +118,7 @@ namespace RC6 // W=32  R= 20 B = 128,192,256
                     D = temp;
                 }
 
-                A = A + RoundKey[2 * R + 3];
+                A = A + RoundKey[2 * R + 2];
                 C = C + RoundKey[2 * R + 3];
                 uint[] tempWords = new uint[4] {A,B,C,D};
                 byte[] block = ToArrayBytes(tempWords, 4);
@@ -138,11 +141,11 @@ namespace RC6 // W=32  R= 20 B = 128,192,256
                 A = A - RoundKey[2*R+2];
                 for (int j = R; j >= 1; j--)
                 {
-                    uint temp = A;
-                    A = B;
-                    B = C;
-                    C = D;
-                    D = temp;
+                    uint temp = D;
+                    D = C;
+                    C = B;
+                    B = A;
+                    A = temp;
                     uint u = LeftShift((D * (2 * D + 1)), ShiftCount((int) Math.Log(W, 2)));
                     uint t = LeftShift((B * (2 * B + 1)), ShiftCount((int)Math.Log(W, 2)));
                     C = RightShift((C - RoundKey[2 * j + 1]), ShiftCount((int) t)) ^ u;
@@ -159,10 +162,11 @@ namespace RC6 // W=32  R= 20 B = 128,192,256
         }
         private static void Test()
         {
-            byte[] test = {0x8f, 0xc3, 0xa5, 0x36, 0x56, 0xb1, 0xf7, 0x78, 0xc1, 0x29, 0xdf, 0x4e, 0x98, 0x48};
+            byte[] test = {0x8f, 0xc3, 0xa5, 0x36, 0x56, 0xb1, 0xf7, 0x78, 0xc1, 0x29, 0xdf, 0x4e, 0x98, 0x48,0xa4,0x1e};
             MainKey = new byte[] {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00};
             byte[] plaintText = {00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00};
             string plaintTextstring = Encoding.UTF8.GetString(plaintText);
+            GenerateKey(128,MainKey);
             byte[] cipher = EncodeRc6(plaintTextstring);
             if (test==cipher)
                 Console.WriteLine("gg easy");
@@ -191,7 +195,7 @@ namespace RC6 // W=32  R= 20 B = 128,192,256
             {
                 try
                 {
-                    GenerateKey(Long);
+                    GenerateKey(Long,null);
                 }
                 catch (Exception e)
                 {
@@ -213,7 +217,6 @@ namespace RC6 // W=32  R= 20 B = 128,192,256
             SelectKeySize();
             Console.WriteLine("Write plain text");
             plainText = Console.ReadLine();
-            Console.WriteLine(Encoding.UTF8.GetString(Encoding.UTF8.GetBytes(plainText)));
             try
             {
                 cipherText = EncodeRc6(plainText);
