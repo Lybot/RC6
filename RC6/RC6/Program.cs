@@ -123,10 +123,39 @@ namespace RC6 // W=32  R= 20 B = 128,192,256
             }
             return cipherText;
         }
-        private static string DecodeRc6(byte[] ciphertext)
+        private static byte[] DecodeRc6(byte[] cipherText)
         {
-            string kek = Encoding.UTF8.GetString(ciphertext);
-            return kek;
+            uint A, B, C, D;
+            int i;
+            byte[] plainText = new byte[cipherText.Length];
+            for (i = 0; i < cipherText.Length; i = i + 16)
+            {
+                A = BitConverter.ToUInt32(cipherText, i);
+                B = BitConverter.ToUInt32(cipherText, i + 4);
+                C = BitConverter.ToUInt32(cipherText, i + 8);
+                D = BitConverter.ToUInt32(cipherText, i + 12);
+                C = C - RoundKey[2*R+3];
+                A = A - RoundKey[2*R+2];
+                for (int j = R; j >= 1; j--)
+                {
+                    uint temp = A;
+                    A = B;
+                    B = C;
+                    C = D;
+                    D = temp;
+                    uint u = LeftShift((D * (2 * D + 1)), ShiftCount((int) Math.Log(W, 2)));
+                    uint t = LeftShift((B * (2 * B + 1)), ShiftCount((int)Math.Log(W, 2)));
+                    C = RightShift((C - RoundKey[2 * j + 1]), ShiftCount((int) t)) ^ u;
+                    A = RightShift((A - RoundKey[2 * j]), ShiftCount((int) u)) ^ t;
+                }
+
+                D = D - RoundKey[1];
+                B = B - RoundKey[0];
+                uint[] tempWords = new uint[4] { A, B, C, D };
+                byte[] block = ToArrayBytes(tempWords, 4);
+                block.CopyTo(plainText, i);
+            }
+            return plainText;
         }
         private static void Test()
         {
@@ -136,7 +165,11 @@ namespace RC6 // W=32  R= 20 B = 128,192,256
             string plaintTextstring = Encoding.UTF8.GetString(plaintText);
             byte[] cipher = EncodeRc6(plaintTextstring);
             if (test==cipher)
-                Console.WriteLine("gg easy");           
+                Console.WriteLine("gg easy");
+            else
+            {
+                Console.WriteLine("LOH");
+            }
         }
         private static void SelectKeySize()
         {
@@ -176,9 +209,11 @@ namespace RC6 // W=32  R= 20 B = 128,192,256
         {
             string plainText;
             byte[] cipherText;
+            byte[] plaintText2;
             SelectKeySize();
             Console.WriteLine("Write plain text");
             plainText = Console.ReadLine();
+            Console.WriteLine(Encoding.UTF8.GetString(Encoding.UTF8.GetBytes(plainText)));
             try
             {
                 cipherText = EncodeRc6(plainText);
@@ -188,22 +223,17 @@ namespace RC6 // W=32  R= 20 B = 128,192,256
                 Console.WriteLine(e);
                 throw;
             }
-
-            //foreach (var bytes in cipherText)
-            //{
-            //    BitConverter.ToString()
-            //}
-            Console.WriteLine(Encoding.Default.GetString(cipherText));
+            Console.WriteLine(Encoding.UTF8.GetString(cipherText));
             try
             {
-                plainText = DecodeRc6(cipherText);
+                plaintText2=DecodeRc6(cipherText);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 throw;
             }
-            Console.WriteLine(plainText);
+            Console.WriteLine(Encoding.UTF8.GetString(plaintText2));
             Console.ReadKey();
         }
     }
