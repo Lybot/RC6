@@ -20,7 +20,18 @@ namespace RC6
         }
         public RC6(int keyLong, byte[] key)
         {
-            GenerateKey(keyLong,key);
+            GenerateKeyTest(keyLong,key);
+        }
+        private static uint LeftShiftTest(uint a, int n)
+        {
+            n &= 0x1f; /* higher rotates would not bring anything */
+            return ((a << n) | (a >> (32 - n)));
+        }
+
+        private static uint RightShiftTest(uint a, int n)
+        {
+            n &= 0x1f; /* higher rotates would not bring anything */
+            return ((a >> n) | (a << (32 - n)));
         }
         private static uint RightShift(uint value, int shift)
         {
@@ -94,6 +105,7 @@ namespace RC6
                 aesCrypto.GenerateKey();
                 MainKey = aesCrypto.Key;
             }
+            else MainKey = keyCheck;
             int c = 0;
             int i, j;
             switch (Long)
@@ -119,13 +131,13 @@ namespace RC6
             uint A, B;
             A = B = 0;
             i = j = 0;
+            L[0] = 0;
             int V = Math.Max(c, 2 * R + 4); // useless
             for (int s = 1; s <= V; s++)
             {
-                A = RoundKey[i] = (RoundKey[i] + A + B) << 3;
-                B = L[j] = (L[j] + A + B) << (int)(A + B);
+                A = RoundKey[i] = LeftShiftTest((RoundKey[i] + A + B),3);
+                B = L[0] = LeftShiftTest((L[0]+A + B), (int)(A + B));
                 i = (i + 1) % (2 * R + 4);
-                j = (j + 1) % c;
             }
         }
         private static byte[] ToArrayBytes(uint[] uints, int Long)
@@ -213,7 +225,7 @@ namespace RC6
         public byte[] EncodeRc6Test(string plaintext)
         {
             uint A, B, C, D;
-            byte[] byteText = Encoding.ASCII.GetBytes(plaintext);
+            byte[] byteText = Encoding.Default.GetBytes(plaintext);
             int i = byteText.Length;    //
             while (i % 16 != 0)         //
                 i++;                    //
@@ -230,10 +242,10 @@ namespace RC6
                 D = D + RoundKey[1];
                 for (int j = 1; j <= R; j++)
                 {
-                    uint t = (B * (2 * B + 1) << (int)(Math.Log(W, 2)));
-                    uint u = (D * (2 * D + 1) << (int)(Math.Log(W, 2)));
-                    A = ((A ^ t) << (int)u) + RoundKey[j * 2];
-                    C = ((C ^ u) << (int)t) + RoundKey[j * 2 + 1];
+                    uint t = LeftShiftTest((B * (2 * B + 1)), (int)(Math.Log(W, 2)));
+                    uint u = LeftShiftTest((D * (2 * D + 1)), (int)(Math.Log(W, 2)));
+                    A = (LeftShiftTest((A ^ t), (int)u)) + RoundKey[j * 2];
+                    C = (LeftShiftTest((C ^ u), (int)t)) + RoundKey[j * 2 + 1];
                     uint temp = A;
                     A = B;
                     B = C;
