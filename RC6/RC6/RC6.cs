@@ -131,13 +131,13 @@ namespace RC6
             uint A, B;
             A = B = 0;
             i = j = 0;
-            L[0] = 0;
-            int V = Math.Max(c, 2 * R + 4); // useless
+            int V = 3*Math.Max(c, 2 * R + 4); // useless
             for (int s = 1; s <= V; s++)
             {
                 A = RoundKey[i] = LeftShiftTest((RoundKey[i] + A + B),3);
-                B = L[0] = LeftShiftTest((L[0]+A + B), (int)(A + B));
+                B = L[j] = LeftShiftTest((L[j] + A + B), (int)(A + B));
                 i = (i + 1) % (2 * R + 4);
+                j = (j + 1) % c;
             }
         }
         private static byte[] ToArrayBytes(uint[] uints, int Long)
@@ -213,78 +213,6 @@ namespace RC6
                     uint t = LeftShift((B * (2 * B + 1)), ShiftCount((int)Math.Log(W, 2)));
                     C = RightShift((C - RoundKey[2 * j + 1]), ShiftCount((int)t)) ^ u;
                     A = RightShift((A - RoundKey[2 * j]), ShiftCount((int)u)) ^ t;
-                }
-                D = D - RoundKey[1];
-                B = B - RoundKey[0];
-                uint[] tempWords = new uint[4] { A, B, C, D };
-                byte[] block = ToArrayBytes(tempWords, 4);
-                block.CopyTo(plainText, i);
-            }
-            return plainText;
-        }
-        public byte[] EncodeRc6Test(string plaintext)
-        {
-            uint A, B, C, D;
-            byte[] byteText = Encoding.Default.GetBytes(plaintext);
-            int i = byteText.Length;    //
-            while (i % 16 != 0)         //
-                i++;                    //
-            byte[] text = new byte[i]; // 
-            byteText.CopyTo(text, 0);    // мб можно проще и я аут, но это первое простое что пришло в голову, чтобы добавить 0 байты до размер блока 128 бит
-            byte[] cipherText = new byte[i];
-            for (i = 0; i < text.Length; i = i + 16)
-            {
-                A = BitConverter.ToUInt32(text, i);
-                B = BitConverter.ToUInt32(text, i + 4);
-                C = BitConverter.ToUInt32(text, i + 8);
-                D = BitConverter.ToUInt32(text, i + 12);
-                B = B + RoundKey[0];
-                D = D + RoundKey[1];
-                for (int j = 1; j <= R; j++)
-                {
-                    uint t = LeftShiftTest((B * (2 * B + 1)), (int)(Math.Log(W, 2)));
-                    uint u = LeftShiftTest((D * (2 * D + 1)), (int)(Math.Log(W, 2)));
-                    A = (LeftShiftTest((A ^ t), (int)u)) + RoundKey[j * 2];
-                    C = (LeftShiftTest((C ^ u), (int)t)) + RoundKey[j * 2 + 1];
-                    uint temp = A;
-                    A = B;
-                    B = C;
-                    C = D;
-                    D = temp;
-                }
-
-                A = A + RoundKey[2 * R + 2];
-                C = C + RoundKey[2 * R + 3];
-                uint[] tempWords = new uint[4] { A, B, C, D };
-                byte[] block = ToArrayBytes(tempWords, 4);
-                block.CopyTo(cipherText, i);
-            }
-            return cipherText;
-        }
-        public byte[] DecodeRc6Test(byte[] cipherText)
-        {
-            uint A, B, C, D;
-            int i;
-            byte[] plainText = new byte[cipherText.Length];
-            for (i = 0; i < cipherText.Length; i = i + 16)
-            {
-                A = BitConverter.ToUInt32(cipherText, i);
-                B = BitConverter.ToUInt32(cipherText, i + 4);
-                C = BitConverter.ToUInt32(cipherText, i + 8);
-                D = BitConverter.ToUInt32(cipherText, i + 12);
-                C = C - RoundKey[2 * R + 3];
-                A = A - RoundKey[2 * R + 2];
-                for (int j = R; j >= 1; j--)
-                {
-                    uint temp = D;
-                    D = C;
-                    C = B;
-                    B = A;
-                    A = temp;
-                    uint u = (D * (2 * D + 1) << (int)Math.Log(W, 2));
-                    uint t = (B * (2 * B + 1) << (int)Math.Log(W, 2));
-                    C = ((C - RoundKey[2 * j + 1]) >> (int)t) ^ u;
-                    A = ((A - RoundKey[2 * j]) >> (int)u) ^ t;
                 }
                 D = D - RoundKey[1];
                 B = B - RoundKey[0];

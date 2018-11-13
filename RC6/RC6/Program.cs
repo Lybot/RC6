@@ -5,35 +5,40 @@ namespace RC6
 {
     class Program
     {
-        private static void Test()
+        private static bool Test()
         {
             byte[] test = { 0x8f, 0xc3, 0xa5, 0x36, 0x56, 0xb1, 0xf7, 0x78, 0xc1, 0x29, 0xdf, 0x4e, 0x98, 0x48, 0xa4, 0x1e };
             byte[] MainKey = new byte[] { 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
             byte[] plaintText = { 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
-            string plaintTextstring = Encoding.ASCII.GetString(plaintText);
-            RC6 kek = new RC6(128, MainKey);
-            byte[] cipher = kek.EncodeRc6Test(plaintTextstring);
-            if (test == cipher)
-                Console.WriteLine("gg easy");
-            else
-            {
-                Console.WriteLine("pomoika");
-            }
-        }
-        private static void Test2()
-        {
-            byte[] test = { 0x3a, 0x96, 0xf9, 0xc7, 0xf6, 0x75, 0x5c, 0xfe, 0x46, 0xf0, 0x0e, 0x3d, 0xdc, 0xd5, 0xa4, 0x1e };
-            byte[] MainKey = new byte[] { 00, 01, 02, 03, 04, 05, 06, 07, 08, 09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f };
-            byte[] plaintText = { 00, 01, 02, 03, 04, 05, 06, 07, 08, 09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f };
-            string plaintTextstring = Encoding.ASCII.GetString(plaintText);
+            string plaintTextstring = Encoding.Default.GetString(plaintText);
             RC6 kek = new RC6(128, MainKey);
             byte[] cipher = kek.EncodeRc6(plaintTextstring);
-            if (test == cipher)
-                Console.WriteLine("gg easy");
-            else
+            int i=0;
+            while (i < test.Length)
             {
-                Console.WriteLine("pomoika");
+                if (test[i] != cipher[i]) return false;
+                i++;
             }
+
+            return true;
+
+        }
+        private static bool Test2()
+        {
+            byte[] test = { 0x3a, 0x96, 0xf9, 0xc7, 0xf6, 0x75, 0x5c, 0xfe, 0x46, 0xf0, 0x0e, 0x3d, 0xcd, 0x5d, 0x2a, 0x3c };
+            byte[] MainKey = new byte[] { 00, 01, 02, 03, 04, 05, 06, 07, 08, 09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f };
+            byte[] plaintText = { 00, 01, 02, 03, 04, 05, 06, 07, 08, 09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f };
+            string plaintTextstring = Encoding.Default.GetString(plaintText);
+            RC6 kek = new RC6(128, MainKey);
+            byte[] cipher = kek.EncodeRc6(plaintTextstring);
+            int i = 0;
+            while (i < test.Length)
+            {
+                if (test[i] != cipher[i]) return false;
+                i++;
+            }
+
+            return true;
         }
 
         private static RC6 SelectKeySize()
@@ -48,15 +53,18 @@ namespace RC6
             {
                 Console.WriteLine("Not letters");
             }
-
             if (Long == 1)
             {
-                Test();
+                bool success= Test();
+                if(success) Console.WriteLine("GG EASY");
+                else Console.WriteLine("Not easy");
             }
 
             if (Long == 2)
             {
-                Test2();
+                bool success = Test2();
+                if (success) Console.WriteLine("GG EASY");
+                else Console.WriteLine("Not easy");
             }
 
             if (Long == 128 || Long == 192 || Long == 256)
