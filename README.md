@@ -17,4 +17,5 @@ https://web.archive.org/web/20070101014400/http://theory.lcs.mit.edu/~rivest/rc6
   `A B` - регистры; <br/>
 `byte[] ToArrayBytes(uint[] uints, int Long) `- конвертирует 4 машинных слова в 16 байт <br/>
 `byte[] EncodeRc6(string plaintext)` - шифрование  <br/>
+`byte[] DecodeRc6(string plaintext)` - расшифрование  <br/>
   `A B C D` - части текста <br/>
