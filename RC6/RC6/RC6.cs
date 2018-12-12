@@ -13,29 +13,35 @@ namespace RC6
         private static byte[] MainKey;
         private const uint P32 = 0xB7E15163;
         private const uint Q32 = 0x9E3779B9;
-
+        //Конструктор с генерацией ключа
         public RC6(int keyLong)
         {
             GenerateKey(keyLong,null);
         }
+        //Конструктор для запуска тестов с заранее заданным ключом
         public RC6(int keyLong, byte[] key)
         {
             GenerateKey(keyLong,key);
         }
+        // Сдвиг вправо без потери
         private static uint RightShift(uint value, int shift)
         {
             return (value >> shift) | (value << (W - shift));
         }
+        //Сдвиг влево без потери
         private static uint LeftShift(uint value, int shift)
         {
             return (value << shift) | (value >> (W - shift));
         }
+        //Генерация main key и раундовых ключей
         private static void GenerateKey(int Long, byte[] keyCheck)
         {
+            //Если main key не задан заранее используем генератор случайных ключей
             if (keyCheck == null)
             {
-                AesCryptoServiceProvider aesCrypto = new AesCryptoServiceProvider // ключи самому генерировать не очень
+                AesCryptoServiceProvider aesCrypto = new AesCryptoServiceProvider //ключи самому генерировать не очень
                 {
+                    //Задаем размер ключа заданный в конструкторе класса
                     KeySize = Long
                 };
                 aesCrypto.GenerateKey();
@@ -44,6 +50,7 @@ namespace RC6
             else MainKey = keyCheck;
             int c = 0;
             int i, j;
+            //В зависимости от размера ключа выбираем на сколько блоков разбивать main key
             switch (Long)
             {
                 case 128:
@@ -61,13 +68,14 @@ namespace RC6
             {
                 L[i] = BitConverter.ToUInt32(MainKey, i * 4);
             }
+            //Сама генерация раундовых ключей в соответствие с документацией
             RoundKey[0] = P32;
             for (i = 1; i < 2 * R + 4; i++)
                 RoundKey[i] = RoundKey[i - 1] + Q32;
             uint A, B;
             A = B = 0;
             i = j = 0;
-            int V = 3 * Math.Max(c, 2 * R + 4); // useless
+            int V = 3 * Math.Max(c, 2 * R + 4);
             for (int s = 1; s <= V; s++)
             {
                 A = RoundKey[i] = LeftShift((RoundKey[i] + A + B), 3);
@@ -89,19 +97,25 @@ namespace RC6
         public byte[] EncodeRc6(string plaintext)
         {
             uint A, B, C, D;
+            //Преобразование полученного текста в массив байт
             byte[] byteText = Encoding.UTF8.GetBytes(plaintext);
-            int i = byteText.Length;    //
-            while (i % 16 != 0)         //
-                i++;                    //
-            byte[] text = new byte[i]; // 
-            byteText.CopyTo(text, 0);    // мб можно проще и я аут, но это первое простое что пришло в голову, чтобы добавить 0 байты до размер блока 128 бит
+            int i = byteText.Length;    
+            while (i % 16 != 0)         
+                i++;                    
+            //Создаем новый массив, кратность рамезрность которого кратна 16, так как алгоритм описывает работу с четырьмя блоками по 4 байта.
+            byte[] text = new byte[i]; 
+            //Записываем туда plaintext
+            byteText.CopyTo(text, 0);    
             byte[] cipherText = new byte[i];
+            //Цикл по каждому блоку из 16 байт
             for (i = 0; i < text.Length; i = i + 16)
             {
+                //Полученный блок из 16 байт разбиваем на 4 машинных слова(по 32 бита)
                 A = BitConverter.ToUInt32(text, i);
                 B = BitConverter.ToUInt32(text, i + 4);
                 C = BitConverter.ToUInt32(text, i + 8);
                 D = BitConverter.ToUInt32(text, i + 12);
+                //Сам алгоритм шифрования в соответствии с документацией
                 B = B + RoundKey[0];
                 D = D + RoundKey[1];
                 for (int j = 1; j <= R; j++)
@@ -116,11 +130,12 @@ namespace RC6
                     C = D;
                     D = temp;
                 }
-
                 A = A + RoundKey[2 * R + 2];
                 C = C + RoundKey[2 * R + 3];
+                //Обратное преобразование машинных слов в массив байтов
                 uint[] tempWords = new uint[4] { A, B, C, D };
                 byte[] block = ToArrayBytes(tempWords, 4);
+                //Запись преобразованных 16 байт в массив байт шифр-текста
                 block.CopyTo(cipherText, i);
             }
             return cipherText;
@@ -130,12 +145,15 @@ namespace RC6
             uint A, B, C, D;
             int i;
             byte[] plainText = new byte[cipherText.Length];
+            //Разбиение шифр-текста на блоки по 16 байт
             for (i = 0; i < cipherText.Length; i = i + 16)
             {
+                //Разбиение блока на 4 машинных слова по 32 бита
                 A = BitConverter.ToUInt32(cipherText, i);
                 B = BitConverter.ToUInt32(cipherText, i + 4);
                 C = BitConverter.ToUInt32(cipherText, i + 8);
                 D = BitConverter.ToUInt32(cipherText, i + 12);
+                //Сам процесс расшифрования в соответствии с документацией
                 C = C - RoundKey[2 * R + 3];
                 A = A - RoundKey[2 * R + 2];
                 for (int j = R; j >= 1; j--)
@@ -152,8 +170,10 @@ namespace RC6
                 }
                 D = D - RoundKey[1];
                 B = B - RoundKey[0];
+                //Преобразование машинных слов обрано в массив байт
                 uint[] tempWords = new uint[4] { A, B, C, D };
                 byte[] block = ToArrayBytes(tempWords, 4);
+                //Запись расшифрованных байт в массив байт расшифрованного текста
                 block.CopyTo(plainText, i);
             }
             return plainText;
