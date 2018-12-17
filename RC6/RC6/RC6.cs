@@ -7,14 +7,16 @@ namespace RC6
 {
     class RC6 // 32/20/16 - 128/192/256
     {
-        private const int R = 20;
-        private static uint[] RoundKey = new uint[2 * R + 4];
-        private const int W = 32;
-        private static byte[] MainKey;
-        private const uint P32 = 0xB7E15163;
+        /* Список переменных*/
+        private const int R = 20; // колличество раундов
+        private static uint[] RoundKey = new uint[2 * R + 4];  // ключ раунда
+        private const int W = 32; // длина машинного слова в битах
+        private static byte[] MainKey; // ключ
+        private const uint P32 = 0xB7E15163; // константы экспоненты золотого сечения
         private const uint Q32 = 0x9E3779B9;
+        /*Генерация ключа*/
         //Конструктор с генерацией ключа
-        public RC6(int keyLong)
+        public RC6(int keyLong) 
         {
             GenerateKey(keyLong,null);
         }
@@ -53,44 +55,45 @@ namespace RC6
             //В зависимости от размера ключа выбираем на сколько блоков разбивать main key
             switch (Long)
             {
-                case 128:
-                    c = 4;
+                case 128:// длина ключа
+                    c = 4; // кол-во слов в ключе
                     break;
-                case 192:
-                    c = 6;
+                case 192:// длина ключа
+                    c = 6; // кол-во слов в ключе
                     break;
-                case 256:
-                    c = 8;
+                case 256: // длина ключа
+                    c = 8; // кол-во слов в ключе
                     break;
             }
             uint[] L = new uint[c];
             for (i = 0; i < c; i++)
             {
-                L[i] = BitConverter.ToUInt32(MainKey, i * 4);
-            }
+                L[i] = BitConverter.ToUInt32(MainKey, i * 4); // разбиваем ключ на слова
+            } 
             //Сама генерация раундовых ключей в соответствие с документацией
             RoundKey[0] = P32;
             for (i = 1; i < 2 * R + 4; i++)
-                RoundKey[i] = RoundKey[i - 1] + Q32;
-            uint A, B;
-            A = B = 0;
-            i = j = 0;
-            int V = 3 * Math.Max(c, 2 * R + 4);
+                RoundKey[i] = RoundKey[i - 1] + Q32; // прибавление к раундовому ключу константу
+            uint A, B; // регистры
+            A = B = 0; 
+            i = j = 0; 
+            int V = 3 * Math.Max(c, 2 * R + 4);  // максимум из раундов или количества слов в ключе
             for (int s = 1; s <= V; s++)
             {
-                A = RoundKey[i] = LeftShift((RoundKey[i] + A + B), 3);
-                B = L[j] = LeftShift((L[j] + A + B), (int)(A + B));
+                A = RoundKey[i] = LeftShift((RoundKey[i] + A + B), 3); // сдвиг влево на 3
+                B = L[j] = LeftShift((L[j] + A + B), (int)(A + B)); // сдвиг влево на a+b
                 i = (i + 1) % (2 * R + 4);
                 j = (j + 1) % c;
             }
         }
+        // разбивает на массив байтов
         private static byte[] ToArrayBytes(uint[] uints, int Long)
         {
             byte[] arrayBytes = new byte[Long * 4];
             for (int i = 0; i < Long; i++)
             {
                 byte[] temp = BitConverter.GetBytes(uints[i]);
-                temp.CopyTo(arrayBytes, i * 4);
+                temp.CopyTo(arrayBytes, i * 4); 
             }
             return arrayBytes;
         }
