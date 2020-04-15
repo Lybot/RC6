@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace RC6
 {
-    class RC6 // 32/20/16 - 128/192/256
+    public class RC6
     {
-        /* Список переменных*/
         private const int R = 20; // колличество раундов
         private static uint[] RoundKey = new uint[2 * R + 4];  // ключ раунда
         private const int W = 32; // длина машинного слова в битах
@@ -16,14 +14,14 @@ namespace RC6
         private const uint Q32 = 0x9E3779B9;
         /*Генерация ключа*/
         //Конструктор с генерацией ключа
-        public RC6(int keyLong) 
+        public RC6(int keyLong)
         {
-            GenerateKey(keyLong,null);
+            GenerateKey(keyLong, null);
         }
         //Конструктор для запуска тестов с заранее заданным ключом
         public RC6(int keyLong, byte[] key)
         {
-            GenerateKey(keyLong,key);
+            GenerateKey(keyLong, key);
         }
         // Сдвиг вправо без потери
         private static uint RightShift(uint value, int shift)
@@ -69,14 +67,14 @@ namespace RC6
             for (i = 0; i < c; i++)
             {
                 L[i] = BitConverter.ToUInt32(MainKey, i * 4); // разбиваем ключ на слова
-            } 
+            }
             //Сама генерация раундовых ключей в соответствие с документацией
             RoundKey[0] = P32;
             for (i = 1; i < 2 * R + 4; i++)
                 RoundKey[i] = RoundKey[i - 1] + Q32; // прибавление к раундовому ключу константу
             uint A, B; // регистры
-            A = B = 0; 
-            i = j = 0; 
+            A = B = 0;
+            i = j = 0;
             int V = 3 * Math.Max(c, 2 * R + 4);  // максимум из раундов или количества слов в ключе
             for (int s = 1; s <= V; s++)
             {
@@ -93,7 +91,7 @@ namespace RC6
             for (int i = 0; i < Long; i++)
             {
                 byte[] temp = BitConverter.GetBytes(uints[i]);
-                temp.CopyTo(arrayBytes, i * 4); 
+                temp.CopyTo(arrayBytes, i * 4);
             }
             return arrayBytes;
         }
@@ -102,13 +100,13 @@ namespace RC6
             uint A, B, C, D;
             //Преобразование полученного текста в массив байт
             byte[] byteText = Encoding.UTF8.GetBytes(plaintext);
-            int i = byteText.Length;    
-            while (i % 16 != 0)         
-                i++;                    
+            int i = byteText.Length;
+            while (i % 16 != 0)
+                i++;
             //Создаем новый массив, кратность рамезрность которого кратна 16, так как алгоритм описывает работу с четырьмя блоками по 4 байта.
-            byte[] text = new byte[i]; 
+            byte[] text = new byte[i];
             //Записываем туда plaintext
-            byteText.CopyTo(text, 0);    
+            byteText.CopyTo(text, 0);
             byte[] cipherText = new byte[i];
             //Цикл по каждому блоку из 16 байт
             for (i = 0; i < text.Length; i = i + 16)

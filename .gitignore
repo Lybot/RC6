@@ -1,2 +1,29 @@
+*.lock
+.vs/
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
 
-RC6/.vs/RC6/v15/Server/sqlite3/db.lock
+# User-specific files (MonoDevelop/Xamarin Studio)
+*.userprefs
+
+# Mono auto generated files
+mono_crash.*
+
+# Build results
+*/[Dd]ebug/
+*/[Dd]ebugPublic/
+*/[Rr]elease/
+*/[Rr]eleases/
+*/x64/
+*/x86/
+*/[Aa][Rr][Mm]/
+*/[Aa][Rr][Mm]64/
+*/bld/
+*/[Bb]in/
+*/[Oo]bj/
+*/[Ll]og/
+*/obj/
